@@ -132,14 +132,9 @@ public:
             new (new_data.GetAddress() + new_pos) T{std::forward<Args>(args)...};
             try {
                 CopyOrMoveElements(data_.GetAddress(), new_data.GetAddress(), new_pos);
-            } catch (...) {
-                std::destroy_at(new_data + new_pos);
-                throw;
-            }
-            try {
                 CopyOrMoveElements(data_.GetAddress() + new_pos, new_data.GetAddress() + new_pos + 1, size_ - new_pos);
             } catch (...) {
-                std::destroy_n(data_.GetAddress(), new_pos + 1);
+                std::destroy_at(new_data.GetAddress() + new_pos);
                 throw;
             }
             data_.Swap(new_data);
@@ -154,7 +149,7 @@ public:
             }
         }
         size_++;
-        return begin() + new_pos;;
+        return begin() + new_pos;
     }    
 
     iterator Erase(const_iterator pos) /*noexcept(std::is_nothrow_move_assignable_v<T>)*/ {
